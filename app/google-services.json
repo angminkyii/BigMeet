@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "74526011737",
+    "firebase_url": "https://popping-fire-7894.firebaseio.com",
+    "project_id": "popping-fire-7894",
+    "storage_bucket": "popping-fire-7894.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:74526011737:android:8d95bca79812d253",
+        "android_client_info": {
+          "package_name": "com.example.minky.bigmeet"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "74526011737-dp9ornqji6ou58djs3u8gaim9vmbb8h7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcXwzFKDWdOrlbzwhX7Dzpojiw1JkMGQU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
