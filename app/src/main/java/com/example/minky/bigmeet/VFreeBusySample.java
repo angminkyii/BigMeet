@@ -54,11 +54,11 @@ public class VFreeBusySample {
 	}*/
 
 	// Time Range
-	// Duration of meeting
+	// duration of meeting
 
 	public static void requestFree(String startTimeStamp, String endTimeStamp,
 								   String duration, Context mcontext, net.fortuna.ical4j.model.Calendar calendar) throws ParseException {
-		// request all free time between (startTimeStamp & endTimeStamp) from
+		// request all free cStartTime between (startTimeStamp & endTimeStamp) from
 		// today till 1 week for a "duration" hours.
 
 		// 1. Start the calendar for today
@@ -131,7 +131,7 @@ public class VFreeBusySample {
 			period.setTimeZone(timezone);
 			System.out.println("Start " + period.getRangeStart());
 			System.out.println("End " + period.getRangeEnd());
-			System.out.println("Duration " + period.getDuration());
+			System.out.println("duration " + period.getDuration());
 
 			// Second while loop starts
 
@@ -162,7 +162,7 @@ public class VFreeBusySample {
 			period.setTimeZone(timezone);
 			System.out.println("Start " + period.getRangeStart());
 			System.out.println("End " + period.getRangeEnd());
-			System.out.println("Duration " + period.getDuration());
+			System.out.println("duration " + period.getDuration());
 		}
 	}
 

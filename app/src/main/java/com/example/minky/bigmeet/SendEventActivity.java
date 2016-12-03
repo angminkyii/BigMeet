@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.provider.CalendarContract;
+import android.provider.ContactsContract;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,16 +28,22 @@ import net.fortuna.ical4j.model.component.VEvent;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class Main2Activity extends AppCompatActivity {
+import static com.example.minky.bigmeet.FirebaseClient.*;
+import static com.example.minky.bigmeet.FirebaseClient.firebaseDatabse;
+
+public class SendEventActivity extends AppCompatActivity {
 
     ListView lv;
     ArrayAdapter<String> ladapter;
     ArrayList<Long> idList;
     String info;
     net.fortuna.ical4j.model.Calendar eventCal;
-    FirebaseDatabase firebaseDatabse;
-    DatabaseReference myRef;
+    String refID;
+    HashMap<String, String> hashMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,19 +51,14 @@ public class Main2Activity extends AppCompatActivity {
         setContentView(R.layout.activity_main2);
         initialise();
         accessCal();
+        eListener();
         checkCalendar();
         eventCal = retrieveEvent();
-        if(eventCal!=null){
+        if (eventCal != null) {
             System.out.println(eventCal.getComponents(Property.DESCRIPTION).toString());
         }
-        pushEventDetails("Mink Y Ang",info);
-        eListener();
-
-        try {
-            VFreeBusySample.requestFree("0900","1800","0130",this,eventCal);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        refID = pushEventDetails();
+        //Toast.makeText(getApplicationContext(), "Token : " + refID, Toast.LENGTH_SHORT).show();
     }
 
     public void initialise() {
@@ -64,40 +66,39 @@ public class Main2Activity extends AppCompatActivity {
         ladapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
         lv.setAdapter(ladapter);
         idList = new ArrayList<>();
-        info = getIntent().getStringExtra("eventDetails");
-        firebaseDatabse = FirebaseDatabase.getInstance();
-        myRef = firebaseDatabse.getReference("event");
-
+        //info is the event details from previous activity.
+        //info = getIntent().getStringExtra("eventDetails");
+        hashMap = (HashMap<String, String>)getIntent().getSerializableExtra("eventDetails");
     }
 
     public void checkCalendar() {
+        //lAdapter stores all the email address synced with user's calendar.
         if (ladapter.isEmpty()) {
             Toast.makeText(getApplicationContext(), "Please add calendar!", Toast.LENGTH_SHORT).show();
             finish();
         }
     }
 
-    public void pushEventDetails(String location, String message){
-        myRef = firebaseDatabse.getReference("event");
-        DatabaseReference progressPath = myRef.child(location).child("progress");
-        DatabaseReference requestPath = myRef.child(location).child("Request");
-        DatabaseReference datePath = requestPath.child("Date");
-        DatabaseReference timePath = requestPath.child("Time");
-        DatabaseReference durationPath = requestPath.child("Duration");
-        DatabaseReference organiserPath = requestPath.child("Organiser");
-        DatabaseReference recipientPath = requestPath.child("Recipients");
+    public String pushEventDetails(){
+        myRef = firebaseDatabse.getReference("Events");
+        DatabaseReference pushRef = myRef.push();
 
-        progressPath.setValue("In Progress");
-        datePath.child("Start").setValue(extractInfo(message, "startDate"));
-        datePath.child("End").setValue(extractInfo(message, "endDate"));
-        timePath.child("Start").setValue(extractInfo(message, "startTime"));
-        timePath.child("End").setValue(extractInfo(message, "endTime"));
-        durationPath.setValue(extractInfo(message, "eventDuration"));
-        organiserPath.setValue("");
-        recipientPath.setValue("");
+        DatabaseReference keyPath = myRef.child(pushRef.getKey());
+
+        Event event = new Event(hashMap);
+        List<Attendees> attendees = new ArrayList<>();
+        List<String> tokens = new ArrayList<>();
+        tokens.add("");
+        tokens.add("");
+        attendees.add(new Attendees("7pOnpCRH2iaXlRaxNyRIva5JFax1",tokens));
+        attendees.add(new Attendees("rRL9vD3k9dgKjMYFJ7KikBzUk0a2",tokens));
+        event.setAttendees(attendees);
+        keyPath.setValue(event);
+        return pushRef.getKey();
     }
 
     public void eListener() {
+        //Any update to Firebase is reflected here
         myRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -127,34 +128,10 @@ public class Main2Activity extends AppCompatActivity {
         });
     }
 
-
-    public String extractInfo(String message, String identity) {
-        String[] extracted = message.split("\\.");
-        String returnedInfo = new String();
-
-        switch (identity) {
-            case "eventName":
-                returnedInfo = extracted[0];
-                break;
-            case "eventDuration":
-                returnedInfo = extracted[1];
-                break;
-            case "startTime":
-                returnedInfo = extracted[2];
-                break;
-            case "endTime":
-                returnedInfo = extracted[3];
-                break;
-            case "startDate":
-                returnedInfo = extracted[4];
-                break;
-            case "endDate":
-                returnedInfo = extracted[5];
-                break;
-        }
-        return returnedInfo;
-    }
-
+    /**
+     * Called at the start of activity to find out how many email addresses that are synced to user's Calendar
+     * These email addresses and their ids are then stored in lAdapter
+     */
     public void accessCal() {
         String[] projection =
                 new String[]{
@@ -186,11 +163,21 @@ public class Main2Activity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Retrieve a list of events from user's calendar
+     * @return Events in a calendar form
+     */
     public net.fortuna.ical4j.model.Calendar retrieveEvent(){
         Toast.makeText(getApplicationContext(),"Retrieving events...",Toast.LENGTH_SHORT).show();
         Calendar beginTime = Calendar.getInstance();
+
+        //Need to change this to specify start date
+        //Better to parse in as input
         beginTime.set(2001, 9, 23, 8, 0);
         Calendar endTime = Calendar.getInstance();
+
+        //Need to change this to specify end date
+        //Better to parse in as input
         endTime.set(2016, 10, 24, 8, 0);
 
         String[] proj = new String[]{
@@ -216,6 +203,15 @@ public class Main2Activity extends AppCompatActivity {
         return tempCal;
     }
 
+    /**
+     * Create event
+     * Note: This only creates an event with no tie to the user calendar
+     * Tbis is not an insert event method
+     * @param begin  being cStartTime and date
+     * @param end end cStartTime and date
+     * @param eventName event name
+     * @return
+     */
     public VEvent createEvent(String begin, String end, String eventName){
         VEvent event;
 

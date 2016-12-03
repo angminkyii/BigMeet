@@ -2,31 +2,36 @@ package com.example.minky.bigmeet;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.Shader;
 import android.media.ExifInterface;
-import android.media.Image;
 import android.net.Uri;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
-import android.support.v4.widget.Space;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.ButtonBarLayout;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
+
+import com.google.firebase.database.DatabaseReference;
+import com.mikhaellopez.circularimageview.CircularImageView;
+
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -34,13 +39,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.minky.bigmeet.FirebaseClient.*;
 import static com.example.minky.bigmeet.MainPageActivity.*;
 
 public class AddGroupActivity extends AppCompatActivity {
 
-    ImageView groupPhoto;
+    CircularImageView groupPhoto;
     Button done;
+    EditText groupName;
     Bitmap groupPhotoBm;
+    Bitmap photo2BSent;
     ArrayAdapter<String> dataAdapter;
     Spinner friendsList;
     List<Contact> contactList;
@@ -56,7 +64,11 @@ public class AddGroupActivity extends AppCompatActivity {
     }
 
     public void initialise(){
-        groupPhoto = (ImageView)findViewById(R.id.imageView3);
+        groupPhoto = (CircularImageView) findViewById(R.id.imageView3);
+        groupPhoto.setShadowRadius(3);
+        groupPhoto.setShadowColor(Color.BLACK);
+        groupPhoto.setBorderColor(Color.WHITE);
+        groupPhoto.setBorderWidth(3);
         groupPhoto.requestLayout();
         groupPhoto.getLayoutParams().height = 300;
         groupPhoto.getLayoutParams().width = 300;
@@ -67,6 +79,7 @@ public class AddGroupActivity extends AppCompatActivity {
         dataAdapter = new ArrayAdapter<>(this,android.R.layout.simple_spinner_item, convertContact2String(contactList));
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         friendsList.setAdapter(dataAdapter);
+        groupName = (EditText)findViewById(R.id.editText6);
     }
 
     public String[] convertContact2String(List<Contact> contactList){
@@ -78,6 +91,16 @@ public class AddGroupActivity extends AppCompatActivity {
         return contacts;
     }
 
+    public String pushGroupDetails(){
+        myRef = firebaseDatabse.getReference("Groups");
+        DatabaseReference pushRef = myRef.push();
+        DatabaseReference keyPath = myRef.child(pushRef.getKey());
+        //Insert group info here to be uploaded onto Firebase
+
+        keyPath.setValue("");
+        return pushRef.getKey();
+    }
+
     public void listeners(){
         done.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -85,9 +108,12 @@ public class AddGroupActivity extends AppCompatActivity {
                 if(groupPhotoBm != null) {
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                     groupPhotoBm.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                    Bundle bundle = new Bundle();
                     byte[] byteArray = stream.toByteArray();
                     Intent intent = new Intent();
-                    intent.putExtra("overlay", byteArray);
+                    bundle.putByteArray("overlay",byteArray);
+                    bundle.putString("groupName",groupName.getText().toString());
+                    intent.putExtras(bundle);
                     setResult(RESULT_OK, intent);
                     finish();
                 }else{
@@ -144,6 +170,7 @@ public class AddGroupActivity extends AppCompatActivity {
         }
 
         paint.setAntiAlias(true);
+        paint.setShadowLayer(4.0f, 0.0f, 2.0f, Color.BLACK);
         canvas.drawARGB(0, 0, 0, 0);
         paint.setColor(color);
         //canvas.drawRoundRect(rectF, roundPx, roundPx, paint);

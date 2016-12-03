@@ -12,6 +12,15 @@
         android:background="#DA5F6A"
         android:scaleType="fitCenter" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Okay"
+        android:id="@+id/button"
+        android:background="@android:color/transparent"
+        android:layout_below="@+id/timePicker2"
+        android:layout_centerHorizontal="true" />
+
     <TimePicker
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -19,14 +28,5 @@
         android:layout_below="@+id/a"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Okay"
-        android:id="@+id/button"
-        android:layout_below="@+id/timePicker2"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

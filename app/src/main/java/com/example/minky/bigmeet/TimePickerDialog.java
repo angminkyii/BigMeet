@@ -13,18 +13,17 @@ import java.util.GregorianCalendar;
 /**
  * Created by minky on 21/04/2016.
  */
-public class ViewDialog2 {
+public class TimePickerDialog {
 
-    int endHour;
-    int endMinute;
-    String endTime;
+    int timeHour;
+    int timeMinute;
 
-    public void showDialog(Activity activity){
+    public void showDialog(Activity activity, final int id){
         final Dialog dialog = new Dialog(activity);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setCancelable(false);
         dialog.setContentView(R.layout.dialog_signin);
-        dialog.onBackPressed();
+
 
         final TimePicker text = (TimePicker) dialog.findViewById(R.id.timePicker2);
 
@@ -34,13 +33,13 @@ public class ViewDialog2 {
             @Override
             public void onClick(View v) {
                 if (text.getCurrentHour() != null) {
-                    endHour = text.getCurrentHour();
-                    endMinute = text.getCurrentMinute();
+                    timeHour = text.getCurrentHour();
+                    timeMinute = text.getCurrentMinute();
                     //endTime = String.valueOf(endHour) + ":" + String.valueOf(endMinute);
                     GregorianCalendar gc = new GregorianCalendar();
-                    gc.set(Calendar.HOUR,endHour);
-                    gc.set(Calendar.MINUTE,endMinute);
-                    MainActivity.mHandler.obtainMessage(MainActivity.CHANGE_ENDTIME, gc).sendToTarget();
+                    gc.set(Calendar.HOUR,timeHour);
+                    gc.set(Calendar.MINUTE,timeMinute);
+                    AddEventActivity.mHandler.obtainMessage(id, gc).sendToTarget();
                 }
                 dialog.dismiss();
             }

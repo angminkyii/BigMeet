@@ -38,7 +38,7 @@ public class DateDialog {
                 month = dp.getMonth()+1;
                 year = dp.getYear();
                 date = new GregorianCalendar(year,month,day);
-                MainActivity.mHandler.obtainMessage(id,date).sendToTarget();
+                AddEventActivity.mHandler.obtainMessage(id,date).sendToTarget();
                 dialog.dismiss();
             }
         });

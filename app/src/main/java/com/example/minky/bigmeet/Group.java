@@ -1,11 +1,13 @@
 package com.example.minky.bigmeet;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by minky on 23/05/2016.
  */
-public class Group {
+public class Group{
     private int id;
     private String name;
     private ArrayList<Contact> members;
@@ -56,6 +58,14 @@ public class Group {
 
     public ArrayList<Contact> getMembers(){
         return this.members;
+    }
+
+    public List<String> getMembersInString(){
+        ArrayList<String> membersString = new ArrayList<>();
+        for(int i=0;i<members.size();i++){
+            membersString.add(members.get(i).getName());
+        }
+        return membersString;
     }
 
     public void setMembers(ArrayList<Contact> members){
